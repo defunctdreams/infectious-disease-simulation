@@ -14,8 +14,8 @@ Classes:
 import random
 import numpy as np
 import pygame
-import buildings
-import display # For typing
+from . import buildings
+from . import display # For typing
 
 class Tilemap:
     """

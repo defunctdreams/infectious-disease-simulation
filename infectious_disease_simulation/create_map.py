@@ -10,9 +10,9 @@ Imports:
 Classes:
     CreateMap
 """
-import display
-import tilemap
-import roads
+from . import display
+from . import tilemap
+from . import roads
 
 class CreateMap:
     """

@@ -9,7 +9,7 @@ Classes:
     House
     Office
 """
-import person # For typing
+from . import person # For typing
 
 class Building:
     """

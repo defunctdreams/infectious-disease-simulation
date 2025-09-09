@@ -14,12 +14,12 @@ Classes:
     Population
 """
 import math
-import initialise_people
-import display # For typing
-import create_map # For typing
-import tilemap # For typing
-import disease # For typing
-import person # For typing
+from . import initialise_people
+from . import display # For typing
+from . import create_map # For typing
+from . import tilemap # For typing
+from . import disease # For typing
+from . import person # For typing
 
 class Population:
     """

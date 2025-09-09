@@ -16,13 +16,13 @@ Classes:
 """
 
 import pygame
-import interface
-import sql_handler
-import display
-import create_map
-import disease
-import population
-import clock
+from . import interface
+from . import sql_handler
+from . import display
+from . import create_map
+from . import disease
+from . import population
+from . import clock
 
 class Main:
     """
