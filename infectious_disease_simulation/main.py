@@ -16,6 +16,7 @@ Classes:
 """
 
 import pygame
+import os
 from . import interface
 from . import sql_handler
 from . import display
@@ -46,12 +47,15 @@ class Main:
         Initialises the Main class, sets up interface, parameters, display, map, disease, population, and clock.
         Runs the simulation if parameters are valid.
         """
+        # Pulls database name
+        db_name: str = self.__get_db_name()
+
         # Initialise interface and get parameters
-        self.__interface: interface.Interface = interface.Interface()
+        self.__interface: interface.Interface = interface.Interface(db_name)
         self.__params: dict[str, any] = self.__interface.get_params()
 
         # Initialise class to handle SQL queries
-        self.__sql_handler: sql_handler.SQLHandler = sql_handler.SQLHandler()
+        self.__sql_handler: sql_handler.SQLHandler = sql_handler.SQLHandler(db_name)
         if self.__none_params(): # If parameters are returned as None (window closed), don't feed params into simulation
             return
         self.__save_params() # Save parameters into database
@@ -161,6 +165,35 @@ class Main:
             self.__display.update()
             pygame_clock.tick(self.__fps) # Update required parts every frame
         pygame.quit()
+
+    def __get_db_name(self, db_name: str = "simulation_params.db") -> str:
+        """
+        Checks where XDG_CONFIG_HOME is, taken from https://cgit.freedesktop.org/xdg/pyxdg/tree/xdg/BaseDirectory.py
+        
+        Args:
+            db_name (str): The name of the database file. Defaults to 'simulation_params.db'.
+
+        Returns:
+            str: The databases full path
+        """
+
+        _home = os.path.expanduser('~')
+        xdg_data_home = os.environ.get('XDG_DATA_HOME') or \
+            os.path.join(_home, '.local', 'share')
+        dir_path = os.path.join(xdg_data_home, "infectious-disease-simulation")
+
+        try:
+            os.makedirs(dir_path) # Only on first run
+        except FileExistsError:
+            print("FILE EXISTS")
+            pass # This just means the directory is already there which will happen for all subsequent runs
+        except Exception as err:
+            print(f"An error occurred: {err}") # Any other error we just put db in current dir
+            dir_path = os.path.curdir
+
+        new_path = os.path.join(dir_path, db_name)
+        print(new_path)
+        return str(new_path)
 
 # Run the main program
 if __name__ == "__main__":

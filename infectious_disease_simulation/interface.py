@@ -26,7 +26,7 @@ class Interface:
         __style (ttk.Style): 
         __params (dict[str, any]): A dictionary to store user-entered simulation parameters.
     """
-    def __init__(self) -> None:
+    def __init__(self, db_name: str) -> None:
         """
         Initialises the Interface class by setting up the main window and creating widgets.
         """
@@ -38,12 +38,15 @@ class Interface:
 
         self.__params: dict[str, any] = {}
 
-        self.__create_widgets()
+        self.__create_widgets(db_name)
         self.__root.protocol("WM_DELETE_WINDOW", self.__on_closing)
 
-    def __create_widgets(self) -> None:
+    def __create_widgets(self, db_name: str) -> None:
         """
         Creates and arranges the widgets for the simulation parameters interface.
+
+        Args:
+            db_name (str): The name of the database file.
         """
         # Simulation Name and Speed
         simulation_frame: ttk.LabelFrame = ttk.LabelFrame(self.__root, text="Simulation")
@@ -162,7 +165,7 @@ class Interface:
 
         # Run and Load Buttons
         ttk.Button(self.__root, text="Run Simulation", command=self.__submit).grid(row=6, column=0, pady=10)
-        ttk.Button(self.__root, text="Load Previous Run", command=self.__load_previous_run).grid(row=6,
+        ttk.Button(self.__root, text="Load Previous Run", command=lambda: self.__load_previous_run(db_name)).grid(row=6,
                                                                                                  column=1,
                                                                                                  pady=10)
 
@@ -352,12 +355,15 @@ class Interface:
 
         return variable_type(value)
 
-    def __load_previous_run(self) -> None:
+    def __load_previous_run(self, db_name: str) -> None:
         """
         Loads parameters from a previous simulation run from the SQLite database.
         Displays a selection window for the user to choose a previous run.
+
+        Args:
+            db_name (str): The name of the database file.
         """
-        connection = sqlite3.connect('simulation_params.db')
+        connection = sqlite3.connect(db_name)
         cursor = connection.cursor()
 
         # Exception handling for loading data
@@ -433,12 +439,12 @@ class Interface:
 
         # Load button calls for loading selected run
         ttk.Button(selection_window, text="Load",
-                   command=lambda: self.__load_selected_run(tree, selection_window)).grid(row=1,
+                   command=lambda: self.__load_selected_run(tree, selection_window, db_name)).grid(row=1,
                                                                                           column=0,
                                                                                           padx=10,
                                                                                           pady=10)
 
-    def __load_selected_run(self, tree: ttk.Treeview, selection_window: tk.Toplevel) -> None:
+    def __load_selected_run(self, tree: ttk.Treeview, selection_window: tk.Toplevel, db_name: str) -> None:
         """
         Handles the event when the 'Load' button is clicked.
         Calls __load_run() to load the selected run parameters from the Treeview into the simulation.
@@ -446,6 +452,7 @@ class Interface:
         Args:
             tree (ttk.Treeview): The Treeview containing the previous run data.
             selection_window (tk.Toplevel): The window for selecting the previous run.
+            db_name (str): The name of the database file.
         """
         selected_item = tree.selection()
 
@@ -455,7 +462,7 @@ class Interface:
             return
 
         run_id = tree.item(selected_item)["values"][0]
-        self.__load_run(run_id, selection_window)
+        self.__load_run(run_id, selection_window, db_name)
 
     def __load_run(self, run_id: int, selection_window: tk.Toplevel) -> None:
         """
@@ -464,8 +471,9 @@ class Interface:
         Args:
             run_id (int): The ID of the selected run.
             selection_window (tk.Toplevel): The window for selecting the previous run.
+            db_name (str): The name of the database file.
         """
-        connection = sqlite3.connect('simulation_params.db')
+        connection = sqlite3.connect(db_name)
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM simulations WHERE run_id=?", (run_id,))
         row = cursor.fetchone()
