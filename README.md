@@ -20,4 +20,9 @@ This README details (in part) the key components of the program and how they wor
 
 6. Use the map window to visualise the movement of people and propagation of the disease, and the graph window to see the live S/E/I/R/D curves
 
+### Run with nix flakes
+* The program is wrapped in a flake, so it can be run with:
+```bash
+nix run 'github:defunctdreams/infectious_disease_simulation'
+```
 
