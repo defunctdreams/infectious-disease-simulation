@@ -37,7 +37,7 @@ This README details (in part) the key components of the program and how they wor
 The program is wrapped in a flake, so it can be run with:
 
 ```bash
-nix run 'github:defunctdreams/infectious_disease_simulation'
+nix run 'github:defunctdreams/infectious-disease-simulation'
 ```
 
 ## About the Project
