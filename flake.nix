@@ -29,7 +29,7 @@
 
           meta = {
             description = "A program to visualise simulations of an infectious disease spreading through a procedurally generated basic town.";
-            homepage = "https://github.com/defunctdreams/infectious_disease_simulation";
+            homepage = "https://github.com/defunctdreams/infectious-disease-simulation";
             license = lib.licenses.gpl3;
             maintainers = with lib.maintainers; [ max-amb ];
             platforms = lib.platforms.linux;
