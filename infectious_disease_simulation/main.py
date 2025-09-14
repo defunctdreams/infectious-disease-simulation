@@ -140,7 +140,7 @@ class Main:
         """
         self.__display.set_caption()
         self.__display.fill((255, 255, 255))
-        self.__display.set_display_icon("images/virus_icon.png")
+        self.__display.set_display_icon("infectious_disease_simulation/images/virus_icon.png")
 
     def __run_simulation(self) -> None:
         """
