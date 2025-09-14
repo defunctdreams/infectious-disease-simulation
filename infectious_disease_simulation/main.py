@@ -185,7 +185,6 @@ class Main:
         try:
             os.makedirs(dir_path) # Only on first run
         except FileExistsError:
-            print("FILE EXISTS")
             pass # This just means the directory is already there which will happen for all subsequent runs
         except Exception as err:
             print(f"An error occurred: {err}") # Any other error we just put db in current dir
