@@ -4,6 +4,8 @@
 
 A program to visualise simulations of an infectious disease spreading through a procedurally generated basic town.
 
+![Simulation Demo Gif](./assets/simulation_demo.gif)
+
 This README details (in part) the key components of the program and how they work.
 
 ## Run
