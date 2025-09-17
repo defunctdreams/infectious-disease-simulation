@@ -464,7 +464,7 @@ class Interface:
         run_id = tree.item(selected_item)["values"][0]
         self.__load_run(run_id, selection_window, db_name)
 
-    def __load_run(self, run_id: int, selection_window: tk.Toplevel) -> None:
+    def __load_run(self, run_id: int, selection_window: tk.Toplevel, db_name: str) -> None:
         """
         Loads the parameters of a selected run from the SQLite database into the current simulation settings.
 
