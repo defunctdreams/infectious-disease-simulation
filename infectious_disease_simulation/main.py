@@ -191,7 +191,6 @@ class Main:
             dir_path = os.path.curdir
 
         new_path = os.path.join(dir_path, db_name)
-        print(new_path)
         return str(new_path)
 
 # Run the main program
