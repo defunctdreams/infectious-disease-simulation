@@ -11,29 +11,35 @@ This README details (in part) the key components of the program and how they wor
 
 ## Run
 
-1. Install poetry with:
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/defunctdreams/infectious-disease-simulation.git
+    ```
+
+2. Install poetry (if not already installed):
 
     ```bash
     pip install poetry
     ```
 
-2. Navigate to the directory in which the code is saved by:
+3. Navigate to the directory in which the code is saved:
 
     ```bash
     cd <PATH>
     ```
 
-3. Run the program using:
+4. Run the program:
 
     ```bash
     poetry run python -m infectious_disease_simulation.main
     ```
 
-4. Set parameters in the GUI, or load a previous simulation's parameters
+5. Set parameters in the `Simulation Parameters` GUI, or load a previous simulation's parameters by clicking `Load Previous Run`
 
-5. Run the simulation
+6. Run the simulation by clicking `Run Simulation`
 
-6. Use the map window to visualise the movement of people and propagation of the disease, and the graph window to see the live S/E/I/R/D curves
+7. Use the map window to visualise the movement of people and propagation of the disease, and the graph window to see the live S/E/I/R/D curves
 
 ### Run with Nix Flakes
 
