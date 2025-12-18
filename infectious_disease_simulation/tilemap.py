@@ -168,17 +168,19 @@ class Tilemap:
         # Python/ NumPy: first index = row (y), second index = column (x)
         # Pygame: first index = column (x), second index = row (y)
         if building_type == "house" and self.__current_houses < self.__num_houses:
-            self.__houses.append(buildings.House((x, y))) # Add to list of houses
-            self.__buildings.append(buildings.House((x, y))) # Add to list of buildings
+            building = buildings.House((x, y))
+            self.__houses.append(building) # Add to list of houses
             self.__map[y, x] = 1
             self.__current_houses += 1
-            empty_locations.remove((x, y))
         elif building_type == "office" and self.__current_offices < self. __num_offices:
-            self.__offices.append(buildings.Office((x, y))) # Add to list of offices
-            self.__buildings.append(buildings.Office((x, y))) # Add to list of buildings
+            building = buildings.Office((x, y))
+            self.__offices.append(building) # Add to list of offices
             self.__map[y, x] = 2
             self.__current_offices += 1
-            empty_locations.remove((x, y))
+
+        self.__buildings.append(building) # Add to list of buildings
+        empty_locations.remove((x, y))
+
 
     def render(self, pause: bool) -> None:
         """
