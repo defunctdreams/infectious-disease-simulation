@@ -149,36 +149,36 @@ class Tilemap:
         """
         return self.__building_height
 
-    def __place_building(self, building_type: str) -> None:
+    def __place_building(self, building_type: str, empty_locations: list[tuple[int, int]]) -> None:
         """
         Places a building of the specified type on the tilemap at a random, empty location.
         If location not empty, random values generated until an empty location is found.
 
         Args:
             building_type (str): The type of building to place.
+            empty_locations (list[tuple[int, int]]): List of available empty locations on the tilemap.
         """
-        placed: bool = False # Flag set to False
+        if not empty_locations:
+            return  # No empty locations available
+        
+        x, y = random.choice(empty_locations) # random empty location
 
-        while not placed:
-            x: int = random.randrange(self.__size[0])
-            y: int = random.randrange(self.__size[1])
-            # NOTE
-            # [x, y] flipped due to differences in coordinate systems in Python/ NumPy and Pygame
-            # Python/ NumPy: first index = row (y), second index = column (x)
-            # Pygame: first index = column (x), second index = row (y)
-            if not self.__map[y, x]: # If building not in x, y location (0 is empty location)
-                if building_type == "house" and self.__current_houses < self.__num_houses:
-                    self.__houses.append(buildings.House((x, y))) # Add to list of houses
-                    self.__buildings.append(buildings.House((x, y))) # Add to list of buildings
-                    self.__map[y, x] = 1
-                    self.__current_houses += 1
-                elif building_type == "office" and self.__current_offices < self. __num_offices:
-                    self.__offices.append(buildings.Office((x, y))) # Add to list of offices
-                    self.__buildings.append(buildings.Office((x, y))) # Add to list of buildings
-                    self.__map[y, x] = 2
-                    self.__current_offices += 1
-
-                placed = True # Set flag to true as building placed
+        # NOTE
+        # [x, y] flipped due to differences in coordinate systems in Python/ NumPy and Pygame
+        # Python/ NumPy: first index = row (y), second index = column (x)
+        # Pygame: first index = column (x), second index = row (y)
+        if building_type == "house" and self.__current_houses < self.__num_houses:
+            self.__houses.append(buildings.House((x, y))) # Add to list of houses
+            self.__buildings.append(buildings.House((x, y))) # Add to list of buildings
+            self.__map[y, x] = 1
+            self.__current_houses += 1
+            empty_locations.remove((x, y))
+        elif building_type == "office" and self.__current_offices < self. __num_offices:
+            self.__offices.append(buildings.Office((x, y))) # Add to list of offices
+            self.__buildings.append(buildings.Office((x, y))) # Add to list of buildings
+            self.__map[y, x] = 2
+            self.__current_offices += 1
+            empty_locations.remove((x, y))
 
     def render(self, pause: bool) -> None:
         """
@@ -188,11 +188,17 @@ class Tilemap:
         Args:
             pause (bool): True if display process to be shown, False if not.
         """
+        # Get empty locations on the tilemap
+        empty_locations: list[tuple[int, int]] = [(x, y)
+                                                  for x in range(self.__size[0])
+                                                  for y in range(self.__size[1])
+                                                  if self.__map[y, x] == 0]
+
         # Loop through number of houses, offices and place on tilemap
         for building, max_count in [("house", self.__num_houses),
                                     ("office", self.__num_offices),]:
             for _ in range(max_count):
-                self.__place_building(building)
+                self.__place_building(building, empty_locations)
 
         for building in self.__buildings:
             x, y = building.get_location()
