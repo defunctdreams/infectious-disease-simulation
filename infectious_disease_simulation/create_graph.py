@@ -27,7 +27,7 @@ class CreateGraph:
 
     def make_graph(self) -> dict[tuple[int, int], list[tuple[int, int]]]:
         """
-        Creates a graph where each building is a node and edges exist between all pairs of nodes.
+        Creates a graph where each building is a node and edges connect to nearby buildings.
 
         Returns:
             dict[tuple[int, int],
@@ -38,16 +38,44 @@ class CreateGraph:
         columns: int = len(self.__map[0])
         graph: dict[tuple[int, int], list[tuple[int, int]]] = {}
         points: list[tuple[int, int]] = []
+        k: int = max(3, int(len(points) ** 0.5)) # Heuristic for number of neighbours
+        k = min(k, 6) # Limit k to max 6
 
+        # Collect building tiles
         for i in range(rows):
             for j in range(columns):
                 if self.__map[i][j] != 0:
-                    points.append((i, j)) # Add coordinates to points list if tile is a building (non-zero)
+                    points.append((i, j))
 
-        for point in points:
+        # For each building, find its nearest neighbours
+        for px, py in points:
+            distances: list[tuple[int, tuple[int, int]]] = []
+            # Compare current building to every other building
+            for qx, qy in points:
+                if (px, py) == (qx, qy): # Do not connect building to itself
+                    continue
+                
+                # Calculate distance (squared to avoid sqrt for efficiency)
+                dx = px - qx
+                dy = py - qy
+                distance_squared = dx * dx + dy * dy
+                distances.append((distance_squared, (qx, qy))) # Store distance and corresponding neighbour
+            
+            # Sort neighbours by distance
+            distances.sort(key=lambda item: item[0])
+
+            # Take the K nearest neighbours
+            neighbours: list[tuple[int, int]] = []
+            limit = min(k, len(distances)) # May have fewer than K neighbours
+            for i in range(limit):
+                neighbours.append(distances[i][1])
+            graph[(px, py)] = neighbours # Assign neighbour list to graph
+
+        return graph
+
+"""        for point in points:
             graph[point] = []
             for other_point in points:
                 if point != other_point: # Avoid self loops
-                    graph[point].append(other_point) # Add points to graph
+                    graph[point].append(other_point) # Add points to graph"""
 
-        return graph
