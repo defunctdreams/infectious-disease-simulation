@@ -27,8 +27,8 @@ class Tilemap:
         __building_height (int): The height of the building to be displayed in the tilemap.
         __size (tuple[int, int]): Number of tiles, depending on display size and building size.
         __map (np.ndarray): A 2D array representing the tilemap grid, initialised with 0s.
-        __houses (list[buildings.House]): List of House objects in the tilemap.
-        __offices (list[buildings.Office]): List of Office objects in the tilemap
+        __houses_list (list[buildings.House]): List of House objects in the tilemap.
+        __offices_list (list[buildings.Office]): List of Office objects in the tilemap
         __houses_dict (dict[tuple[int, int], buildings.House]): Dictionary mapping locations to House objects in the tilemap.
         __offices_dict (dict[tuple[int, int], buildings.Office]): Dictionary mapping locations to Office objects in the tilemap.
         __buildings (list[buildings.Building]): List of the buildings in the tilemap.
@@ -56,8 +56,8 @@ class Tilemap:
         self.__size: tuple[int, int] = (int(self.__display.get_width() / building_width),
                                         int(self.__display.get_height() / building_height))
         self.__map: np.ndarray = np.zeros(self.__size, dtype=int) # Array of 0s of size self.__size
-        self.__houses: list[buildings.House] = [] # More efficient downstream for insertion-ordered index access
-        self.__offices: list[buildings.Office] = [] # More efficient downstream for insertion-ordered index access
+        self.__houses_list: list[buildings.House] = [] # More efficient downstream for insertion-ordered index access
+        self.__offices_list: list[buildings.Office] = [] # More efficient downstream for insertion-ordered index access
         self.__houses_dict: dict[tuple[int, int], buildings.House] = {}
         self.__offices_dict: dict[tuple[int, int], buildings.Office] = {}
         self.__buildings: list[buildings.Building] = []
@@ -82,7 +82,7 @@ class Tilemap:
         Returns:
             list[buildings.House]: The list of houses.
         """
-        return self.__houses
+        return self.__houses_list
 
     def get_offices(self) -> list[buildings.Office]:
         """
@@ -91,7 +91,25 @@ class Tilemap:
         Returns:
             list[buildings.Office]: The list of offices.
         """
-        return self.__offices
+        return self.__offices_list
+    
+    def get_houses_dict(self) -> dict[tuple[int, int], buildings.House]:
+        """
+        Returns the dictionary mapping locations to House objects in the tilemap.
+
+        Returns:
+            dict[tuple[int, int], buildings.House]: The dictionary of houses by location.
+        """
+        return self.__houses_dict
+    
+    def get_offices_dict(self) -> dict[tuple[int, int], buildings.Office]:
+        """
+        Returns the dictionary mapping locations to Office objects in the tilemap.
+
+        Returns:
+            dict[tuple[int, int], buildings.Office]: The dictionary of offices by location.
+        """
+        return self.__offices_dict
 
     def get_buildings(self) -> list[buildings.Building]:
         """
@@ -176,13 +194,13 @@ class Tilemap:
         if building_type == "house" and self.__current_houses < self.__num_houses:
             building = buildings.House((x, y))
             self.__houses_dict[building.get_location()] = building # Store house by location for fast lookup
-            self.__houses.append(building) # Append to list of houses
+            self.__houses_list.append(building) # Append to list of houses
             self.__map[y, x] = 1
             self.__current_houses += 1
         elif building_type == "office" and self.__current_offices < self. __num_offices:
             building = buildings.Office((x, y))
             self.__offices_dict[building.get_location()] = building # Store office by location for fast lookup
-            self.__offices.append(building) # Append to list of offices
+            self.__offices_list.append(building) # Append to list of offices
             self.__map[y, x] = 2
             self.__current_offices += 1
 
