@@ -171,45 +171,40 @@ class Tilemap:
         """
         return self.__building_height
 
-    def __place_building(self, building_type: str, empty_locations: list[tuple[int, int]]) -> None:
+    def __place_building(self, building_cls: buildings.Building, empty_locations: list[tuple[int, int]]) -> None:
         """
         Places a building of the specified type on the tilemap at a random, empty location.
         If location not empty, random values generated until an empty location is found.
 
         Args:
-            building_type (str): The type of building to place.
+            building_cls (buildings.Building): The type of building ofbject to place.
             empty_locations (list[tuple[int, int]]): List of available empty locations on the tilemap.
         """
+        # No empty locations available
         if not empty_locations:
-            return  # No empty locations available
+            return
         
         x, y = random.choice(empty_locations) # random empty location
-
-        building = None
+        building = building_cls((x, y))
 
         # NOTE
         # [x, y] flipped due to differences in coordinate systems in Python/ NumPy and Pygame
         # Python/ NumPy: first index = row (y), second index = column (x)
         # Pygame: first index = column (x), second index = row (y)
-        if building_type == "house" and self.__current_houses < self.__num_houses:
-            building = buildings.House((x, y))
+        if isinstance(building, buildings.House) and self.__current_houses < self.__num_houses:
             self.__houses_dict[building.get_location()] = building # Store house by location for fast lookup
             self.__houses_list.append(building) # Append to list of houses
-            self.__map[y, x] = 1
             self.__current_houses += 1
-        elif building_type == "office" and self.__current_offices < self. __num_offices:
-            building = buildings.Office((x, y))
+        elif isinstance(building, buildings.Office) and self.__current_offices < self. __num_offices:
             self.__offices_dict[building.get_location()] = building # Store office by location for fast lookup
             self.__offices_list.append(building) # Append to list of offices
-            self.__map[y, x] = 2
             self.__current_offices += 1
-
-        if building is not None:
-            self.__buildings.append(building) # Add to list of buildings
-            try:
-                empty_locations.remove((x, y))
-            except ValueError: # Shouldn't happen
-                pass  # Location not in list, ignore
+        else:
+            return # Do not place building if max count reached
+        
+        self.__buildings.append(building) # Add to list of buildings
+        self.__map[y, x] = building.get_tile_value() # Update tilemap array
+        empty_locations.remove((x, y))
 
     def render(self, pause: bool) -> None:
         """
@@ -226,10 +221,10 @@ class Tilemap:
                                                   if self.__map[y, x] == 0]
 
         # Loop through number of houses, offices and place on tilemap
-        for building, max_count in [("house", self.__num_houses),
-                                    ("office", self.__num_offices),]:
+        for building_cls, max_count in [(buildings.House, self.__num_houses),
+                                        (buildings.Office, self.__num_offices),]:
             for _ in range(max_count):
-                self.__place_building(building, empty_locations)
+                self.__place_building(building_cls, empty_locations)
 
         for building in self.__buildings:
             x, y = building.get_location()
