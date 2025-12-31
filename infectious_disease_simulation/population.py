@@ -146,6 +146,7 @@ class Population:
         Returns:
             dict[int, list[person.Person]]: The dictionary of route intersections for each person.
         """
+        """
         intersections: dict[int, list[person.Person]] = {}
 
         for i, individual in enumerate(self.__people):
@@ -157,6 +158,42 @@ class Population:
                     other_person_route: set[tuple[int, int]] = set(other_person.get_home_to_office_route())
                     if person_route.intersection(other_person_route): # Use intersection operations on sets
                         intersections[person_id].append(other_person) # Add other person to list of intersections
+
+        return intersections
+        """
+        intersections: dict[int, list[person.Person]] = {}
+
+        # Precompute route sets for each person and build tile -> people buckets
+        tile_buckets: dict[tuple[int, int], list[person.Person]] = {}
+        person_route_sets: dict[int, set[tuple[int, int]]] = {}
+
+        for individual in self.__people:
+            pid: int = individual.get_person_id()
+            # Compute the route once and turn into a set of tiles (removes duplicate tiles)
+            route_tiles: set[tuple[int, int]] = set(individual.get_home_to_office_route())
+            person_route_sets[pid] = route_tiles
+
+            # Add this person to each tile's bucket
+            for tile in route_tiles:
+                if tile not in tile_buckets:
+                    tile_buckets[tile] = []
+                tile_buckets[tile].append(individual)
+
+        # For each person, aggregate other people who share any tile
+        for individual in self.__people:
+            pid: int = individual.get_person_id()
+            intersections[pid] = []
+            route_tiles = person_route_sets.get(pid, set())
+
+            # Use a set to avoid duplicates when multiple tiles are shared with the same person
+            others_set: set[person.Person] = set()
+            for tile in route_tiles:
+                for other in tile_buckets.get(tile, []):
+                    if other is not individual:
+                        others_set.add(other)
+
+            # Convert to list of person.Person objects for more efficient access downstream
+            intersections[pid] = list(others_set)
 
         return intersections
 
