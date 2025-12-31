@@ -264,13 +264,16 @@ class InitialisePeople:
         num_in_office: int = office_location_dist_dict[office_location]
         positions: list[tuple[int, int]] = self.__calculate_positions(num_in_office, office_location)
         occupants: list[person.Person] = self.__tilemap.get_office_from_location(office_location).get_occupants()
-        occupant_index: int = None
+        occupant_index: int | None = None
 
         # Get person's occupant_index in occupants of office so office position can be calculated
         for index, individual in enumerate(occupants):
             if individual.get_person_id() == person_id:
                 occupant_index = index
                 break
+
+        if occupant_index is None:
+            raise RuntimeError(f"Person ID {person_id} not found in occupants of office at location {office_location}")
 
         # Place in position depending on occupant index in positions to ensure no same positions.
         office_position: tuple[int, int] = positions[occupant_index]
@@ -382,10 +385,10 @@ class InitialisePeople:
             int: The radius.
         """
         default_radius: int = min(self.__building_width, self.__building_height) // 10
+        # Determine layour divisions (grid) and derive radius so items fit
+        divisions: int = math.ceil(math.sqrt(num_in_building))
         # Radius so everyone's radii fit exactly into building
-        even_radius: int = (min(self.__building_width, self.__building_height)
-        //
-        (2 * (math.ceil(math.sqrt(num_in_building)) + 1)))
+        even_radius: int = min(self.__building_width, self.__building_height) // (2 * (divisions + 1))
 
         radius: int = min(default_radius, even_radius) # Smallest of the two
         return radius
