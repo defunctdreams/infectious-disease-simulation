@@ -2,6 +2,7 @@
 Defines classes for different types of buildings and their properties.
 
 Imports:
+    abc: For creating abstract base classes.
     person: Class managing and holding a simulated person's properties and person-specific methods.
 
 Classes:
@@ -9,9 +10,10 @@ Classes:
     House
     Office
 """
+from abc import ABC, abstractmethod
 from . import person # For typing
 
-class Building:
+class Building(ABC):
     """
     A class representing a building.
 
@@ -20,13 +22,12 @@ class Building:
         __colour (tuple[int, int, int]): The colour of the building.
         __occupants (list[person.Person]): The list of occupants in the building.
     """
-    def __init__(self, location: tuple[int, int], building_type: str, colour: tuple[int, int, int]) -> None:
+    def __init__(self, location: tuple[int, int], colour: tuple[int, int, int]) -> None:
         """
         Initialises the Building class with the given parameters.
 
         Args:
             location (tuple[int, int]): The location of the building.
-            building_type (str): The type of the building.
             colour (tuple[int, int, int]): The colour of the building.
         """
         self.__location: tuple[int, int] = location
@@ -68,6 +69,16 @@ class Building:
             tuple[int, int, int]: The colour of the building.
         """
         return self.__colour
+    
+    @abstractmethod
+    def get_tile_value(self) -> int:
+        """
+        Gets the tile value of the building based on its type.
+        
+        Returns:
+            int: The tile value of the building.
+        """
+        pass
 
 class House(Building):
     """
@@ -80,7 +91,10 @@ class House(Building):
         Args:
             location (tuple[int, int]): The location of the house.
         """
-        super().__init__(location, "house", (100, 200, 100))
+        super().__init__(location, (100, 200, 100))
+
+    def get_tile_value(self) -> int:
+        return 1
 
 class Office(Building):
     """
@@ -93,4 +107,7 @@ class Office(Building):
         Args:
             location (tuple[int, int]): The location of the office.
         """
-        super().__init__(location, "office", (100, 100, 200))
+        super().__init__(location, (100, 100, 200))
+    
+    def get_tile_value(self) -> int:
+        return 2
