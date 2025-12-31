@@ -28,7 +28,9 @@ class Tilemap:
         __size (tuple[int, int]): Number of tiles, depending on display size and building size.
         __map (np.ndarray): A 2D array representing the tilemap grid, initialised with 0s.
         __houses (list[buildings.House]): List of House objects in the tilemap.
-        __offices (list[building.Office]): List of Office objects in the tilemap.
+        __offices (list[buildings.Office]): List of Office objects in the tilemap
+        __houses_dict (dict[tuple[int, int], buildings.House]): Dictionary mapping locations to House objects in the tilemap.
+        __offices_dict (dict[tuple[int, int], buildings.Office]): Dictionary mapping locations to Office objects in the tilemap.
         __buildings (list[buildings.Building]): List of the buildings in the tilemap.
         __num_houses (int): The number of houses to be placed on the tilemap.
         __num_offices (int): The number of offices to be placed on the tilemap.
@@ -54,8 +56,10 @@ class Tilemap:
         self.__size: tuple[int, int] = (int(self.__display.get_width() / building_width),
                                         int(self.__display.get_height() / building_height))
         self.__map: np.ndarray = np.zeros(self.__size, dtype=int) # Array of 0s of size self.__size
-        self.__houses: list[buildings.House] = []
-        self.__offices: list[buildings.Office] = []
+        self.__houses: list[buildings.House] = [] # More efficient downstream for insertion-ordered index access
+        self.__offices: list[buildings.Office] = [] # More efficient downstream for insertion-ordered index access
+        self.__houses_dict: dict[tuple[int, int], buildings.House] = {}
+        self.__offices_dict: dict[tuple[int, int], buildings.Office] = {}
         self.__buildings: list[buildings.Building] = []
         self.__num_houses: int = num_houses
         self.__num_offices: int = num_offices
@@ -105,10 +109,10 @@ class Tilemap:
         Returns:
             buildings.House: The House object with the required location.
         """
-        for house in self.__houses:
-            if house.get_location() == location:
-                return house
-        return None
+        try:
+            return self.__houses_dict[location]
+        except KeyError:
+            raise RuntimeError(f"No house found at location {location}")
 
     def get_office_from_location(self, location: tuple[int, int]) -> buildings.Office:
         """
@@ -117,10 +121,10 @@ class Tilemap:
         Returns:
             buildings.Office: The Office object with the required location.
         """
-        for office in self.__offices:
-            if office.get_location() == location:
-                return office
-        return None
+        try:
+            return self.__offices_dict[location]
+        except KeyError:
+            raise RuntimeError(f"No office found at location {location}")
 
     def get_map(self) -> np.ndarray:
         """
@@ -163,24 +167,31 @@ class Tilemap:
         
         x, y = random.choice(empty_locations) # random empty location
 
+        building = None
+
         # NOTE
         # [x, y] flipped due to differences in coordinate systems in Python/ NumPy and Pygame
         # Python/ NumPy: first index = row (y), second index = column (x)
         # Pygame: first index = column (x), second index = row (y)
         if building_type == "house" and self.__current_houses < self.__num_houses:
             building = buildings.House((x, y))
-            self.__houses.append(building) # Add to list of houses
+            self.__houses_dict[building.get_location()] = building # Store house by location for fast lookup
+            self.__houses.append(building) # Append to list of houses
             self.__map[y, x] = 1
             self.__current_houses += 1
         elif building_type == "office" and self.__current_offices < self. __num_offices:
             building = buildings.Office((x, y))
-            self.__offices.append(building) # Add to list of offices
+            self.__offices_dict[building.get_location()] = building # Store office by location for fast lookup
+            self.__offices.append(building) # Append to list of offices
             self.__map[y, x] = 2
             self.__current_offices += 1
 
-        self.__buildings.append(building) # Add to list of buildings
-        empty_locations.remove((x, y))
-
+        if building is not None:
+            self.__buildings.append(building) # Add to list of buildings
+            try:
+                empty_locations.remove((x, y))
+            except ValueError: # Shouldn't happen
+                pass  # Location not in list, ignore
 
     def render(self, pause: bool) -> None:
         """
