@@ -122,8 +122,10 @@ class PriorityQueue:
         if len(self.__elements) == 1:
             return self.__elements.pop()[1]
 
-        item: tuple[int, tuple[int, int]] = self.__elements.pop(0)
-        self.__bubble_down(0) # Maintain priority order
+        # Move the last element to the root
+        item = self.__elements[0]
+        self.__elements[0] = self.__elements.pop()
+        self.__bubble_down(0)  # Maintain heap property
         return item[1]
 
     def __bubble_up(self, index: int) -> None:
