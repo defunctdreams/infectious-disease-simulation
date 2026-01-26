@@ -423,8 +423,18 @@ class Interface:
         tree.configure(yscroll=scrollbar.set)
         scrollbar.grid(row=0, column=1, sticky="ns")
 
-        for row in rows:
-            tree.insert("", "end", values=row)
+        for summary in rows:
+            tree.insert("", "end", values=(
+                summary["run_id"],
+                summary["datetime"],
+                summary["simulation_name"],
+                summary["num_houses"],
+                summary["num_offices"],
+                summary["infection_rate"],
+                summary["incubation_time"],
+                summary["recovery_rate"],
+                summary["mortality_rate"],
+            ))
 
         ttk.Button(
             self.__load_window,
@@ -462,68 +472,38 @@ class Interface:
             db_name (str): The name of the database file.
         """
         try:
-            with DBHandler(self.__db_name) as db_handler:
-                row: tuple = db_handler.fetch_run(run_id)
+            with DBHandler(self.__db_name) as db:
+                loaded = db.fetch_run(run_id)
         except DBError as e:
             messagebox.showerror("Database Error", str(e))
             return
 
-        # Delete previous values and insert loaded values
-        if row:
-            (_, _, # run_id, datetime
-             simulation_name, simulation_speed,
-             display_size,
-             num_houses, num_offices, building_size,
-             num_people_in_house,
-             show_drawing, additional_roads,
-             infection_rate, incubation_time, recovery_rate, mortality_rate) = row
+        if not loaded:
+            messagebox.showerror("Load Error", "Selected run not found.")
+            return
 
-            loaded = {
-                "simulation_name": simulation_name,
-                "display_size": display_size,
-                "num_houses": num_houses,
-                "num_offices": num_offices,
-                "building_size": building_size,
-                "num_people_in_house": num_people_in_house,
-                "infection_rate": infection_rate,
-                "incubation_time": incubation_time,
-                "recovery_rate": recovery_rate,
-                "mortality_rate": mortality_rate,
-            }
-
-            for key, value in loaded.items():
+        # Fill entry widgets
+        for key, value in loaded.items():
+            if key in self.__params:
                 widget = self.__params[key]
                 widget.delete(0, tk.END)
                 widget.insert(0, value)
 
-            self.__simulation_speed.set(simulation_speed)
-            self.__update_speed_label(simulation_speed)
-            self.__show_drawing.set(show_drawing)
-            self.__additional_roads.set(additional_roads)
+        # Fill non-entry widgets
+        self.__simulation_speed.set(loaded["simulation_speed"])
+        self.__update_speed_label(loaded["simulation_speed"])
+        self.__show_drawing.set(loaded["show_drawing"])
+        self.__additional_roads.set(loaded["additional_roads"])
 
-            self.__config = Config.from_dict(loaded | {
-                "simulation_speed": simulation_speed,
-                "show_drawing": show_drawing,
-                "additional_roads": additional_roads,
-            })
+        # Build Config
+        self.__config = Config.from_dict(loaded)
 
-        self.__close_load_window() # Close selection window
+        self.__close_load_window()
 
     def __close_load_window(self):
         if self.__load_window is not None:
             self.__load_window.destroy()
             self.__load_window = None
-
-
-    def get_params(self) -> dict[str, any]:
-        """
-        Starts the main loop for the Tkinter GUI and returns the parameters after the loop ends.
-
-        Returns:
-            dict: The simulation parameters.
-        """
-        self.__root.mainloop()
-        return self.__params
 
     def get_config(self) -> Config | None:
         """
@@ -532,4 +512,5 @@ class Interface:
         Returns:
             Config | None: The Config object or None if parameters were not set.
         """
+        self.__root.mainloop()
         return self.__config
