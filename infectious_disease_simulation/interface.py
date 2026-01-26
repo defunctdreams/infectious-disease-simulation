@@ -46,6 +46,8 @@ class Interface:
         self.__create_widgets(self.__db_name)
         self.__root.protocol("WM_DELETE_WINDOW", self.__on_closing)
 
+        self.__load_window: tk.Toplevel | None = None
+
     def __create_widgets(self, db_name: str) -> None:
         """
         Creates and arranges the widgets for the simulation parameters interface.
@@ -375,6 +377,18 @@ class Interface:
         Args:
             db_name (str): The name of the database file.
         """
+        # If window already exists, bring it to the front
+        if self.__load_window is not None and self.__load_window.winfo_exists():
+            self.__load_window.lift()
+            return
+
+        # Create new window
+        self.__load_window = tk.Toplevel(self.__root)
+        self.__load_window.title("Select Previous Run")
+
+        # When closed, clear reference
+        self.__load_window.protocol("WM_DELETE_WINDOW", self.__close_load_window)
+
         try:
             with DBHandler(self.__db_name) as db_handler:
                 rows: list[tuple] = db_handler.fetch_runs_summary()
@@ -382,46 +396,29 @@ class Interface:
             messagebox.showerror("Database Error", str(e))
             return
 
-        # If empty database of previous runs
         if not rows:
             messagebox.showinfo("Load Previous Run", "No previous runs found.")
+            self.__close_load_window()
             return
 
-        selection_window = tk.Toplevel(self.__root)
-        selection_window.title("Select Previous Run")
-
-        frame = ttk.Frame(selection_window)
+        frame = ttk.Frame(self.__load_window)
         frame.grid(row=0, column=0, padx=10, pady=10)
 
-        # Initialise Treeview
-        tree = ttk.Treeview(frame, columns=("run_id",
-                                            "datetime",
-                                            "simulation_name",
-                                            "num_houses",
-                                            "num_offices",
-                                            "infection_rate",
-                                            "incubation_time",
-                                            "recovery_rate",
-                                            "mortality_rate"), show='headings')
+        tree = ttk.Treeview(
+            frame,
+            columns=("run_id", "datetime", "simulation_name",
+                    "num_houses", "num_offices",
+                    "infection_rate", "incubation_time",
+                    "recovery_rate", "mortality_rate"),
+            show='headings'
+        )
 
-        tree.heading("run_id", text="Run ID", anchor="center")
-        tree.heading("datetime", text="Date and Time", anchor="center")
-        tree.heading("simulation_name", text="Simulation Name", anchor="center")
-        tree.heading("num_houses", text="Houses", anchor="center")
-        tree.heading("num_offices", text="Offices", anchor="center")
-        tree.heading("infection_rate", text="Infection Rate", anchor="center")
-        tree.heading("incubation_time", text="Incubation Time", anchor="center")
-        tree.heading("recovery_rate", text="Recovery Rate", anchor="center")
-        tree.heading("mortality_rate", text="Mortality Rate", anchor="center")
-
-        # Set column widths
         for col in tree["columns"]:
+            tree.heading(col, text=col.replace("_", " ").title(), anchor="center")
             tree.column(col, width=150, anchor="center")
 
-        # Fill cells
         tree.grid(row=0, column=0, sticky="nsew")
 
-        # Initialise scrollbar and fill to up/down in cell
         scrollbar = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=tree.yview)
         tree.configure(yscroll=scrollbar.set)
         scrollbar.grid(row=0, column=1, sticky="ns")
@@ -429,15 +426,13 @@ class Interface:
         for row in rows:
             tree.insert("", "end", values=row)
 
-        # Load button calls for loading selected run
-        ttk.Button(selection_window,
-                   text="Load",
-                   command=lambda: self.__load_selected_run(tree, selection_window, self.__db_name)).grid(row=1,
-                                                                                          column=0,
-                                                                                          padx=10,
-                                                                                          pady=10)
+        ttk.Button(
+            self.__load_window,
+            text="Load",
+            command=lambda: self.__load_selected_run(tree)
+        ).grid(row=1, column=0, padx=10, pady=10)
 
-    def __load_selected_run(self, tree: ttk.Treeview, selection_window: tk.Toplevel, db_name: str) -> None:
+    def __load_selected_run(self, tree: ttk.Treeview) -> None:
         """
         Handles the event when the 'Load' button is clicked.
         Calls __load_run() to load the selected run parameters from the Treeview into the simulation.
@@ -455,9 +450,9 @@ class Interface:
             return
 
         run_id = tree.item(selected_item)["values"][0]
-        self.__load_run(run_id, selection_window, self.__db_name)
+        self.__load_run(run_id)
 
-    def __load_run(self, run_id: int, selection_window: tk.Toplevel, db_name: str) -> None:
+    def __load_run(self, run_id: int) -> None:
         """
         Loads the parameters of a selected run from the SQLite database into the current simulation settings.
 
@@ -512,7 +507,13 @@ class Interface:
                 "additional_roads": additional_roads,
             })
 
-        selection_window.destroy() # Close selection window
+        self.__close_load_window() # Close selection window
+
+    def __close_load_window(self):
+        if self.__load_window is not None:
+            self.__load_window.destroy()
+            self.__load_window = None
+
 
     def get_params(self) -> dict[str, any]:
         """
