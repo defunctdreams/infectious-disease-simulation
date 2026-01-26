@@ -136,9 +136,10 @@ class Main:
 
         # Enter simulation loop
         while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT: # Handle quitting
-                    running = False
+            if not self.__display.is_headless():
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT: # Handle quitting
+                        running = False
 
             if self.__clock.get_running():
                 self.__clock.update_time() # Update simulation time
