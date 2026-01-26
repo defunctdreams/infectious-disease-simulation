@@ -24,6 +24,9 @@ from . import create_map
 from . import disease
 from . import population
 from . import clock
+from .config import Config
+from .errors import ConfigError, DBError
+from .storage.db_handler import DBHandler
 
 class Main:
     """
@@ -52,48 +55,56 @@ class Main:
 
         # Initialise interface and get parameters
         self.__interface: interface.Interface = interface.Interface(db_name)
-        self.__params: dict[str, any] = self.__interface.get_params()
+        params: dict[str, any] = self.__interface.get_params()
+        if params is None: # If window closed
+            return
+        
+        try:
+            self.__config: Config = Config.from_dict(params)
+        except ConfigError as e:
+            print(f"Configuration Error: {e}")
+            return
 
         # Initialise class to handle SQL queries
-        self.__sql_handler: sql_handler.SQLHandler = sql_handler.SQLHandler(db_name)
-        if self.__none_params(): # If parameters are returned as None (window closed), don't feed params into simulation
-            return
-        self.__save_params() # Save parameters into database
-        self.__sql_handler.close_connection()
-        print("Parameters saved successfully.")
+        try:
+            with DBHandler(db_name) as db_handler:
+                db_handler.save_params(self.__config)
+            print("Parameters saved successfully.")
+        except DBError as e:
+            print(f"Error while saving parameters: {e}")
 
         # Configure timescales
-        self.__seconds_per_hour: float = 1 / self.__params['simulation_speed']
+        self.__seconds_per_hour: float = 1 / self.__config.simulation_speed
         self.__fps: int = 60
 
         # Initialise display with parameters
-        self.__display: display.Display = display.Display(self.__params['display_size'],
-                                                          self.__params['display_size'],
-                                                          self.__params['simulation_name'])
+        self.__display: display.Display = display.Display(self.__config.display_size,
+                                                          self.__config.display_size,
+                                                          self.__config.simulation_name)
         self.__initialise_display()
 
         # Create a separate surface for the map, intialise and draw map with parameters
         self.__map_surface: pygame.Surface = pygame.Surface((self.__display.get_width(), self.__display.get_height()))
         self.__map: create_map.CreateMap = create_map.CreateMap(self.__display,
-                                                               self.__params['num_houses'],
-                                                               self.__params['num_offices'],
-                                                               self.__params['building_size'],
-                                                               self.__params['building_size'])
-        self.__map.draw(self.__params['show_drawing'], self.__params['additional_roads'])
+                                                               self.__config.num_houses,
+                                                               self.__config.num_offices,
+                                                               self.__config.building_size,
+                                                               self.__config.building_size)
+        self.__map.draw(self.__config.show_drawing, self.__config.additional_roads)
 
         # Draw map onto map surface
         self.__map_surface.blit(self.__display.get_screen(), (0, 0))
 
         # Initialise disease with parameters
-        self.__disease: disease.Disease = disease.Disease(self.__params['infection_rate'],
-                                                          self.__params['incubation_time'],
-                                                          self.__params['recovery_rate'],
-                                                          self.__params['mortality_rate'],
+        self.__disease: disease.Disease = disease.Disease(self.__config.infection_rate,
+                                                          self.__config.incubation_time,
+                                                          self.__config.recovery_rate,
+                                                          self.__config.mortality_rate,
                                                           self.__seconds_per_hour)
 
         # Initialise population with parameters
         print("Initialising Population...")
-        self.__population: population.Population = population.Population(self.__params['num_people_in_house'],
+        self.__population: population.Population = population.Population(self.__config.num_people_in_house,
                                                                          self.__display,
                                                                          self.__map,
                                                                          self.__disease,
@@ -124,13 +135,13 @@ class Main:
         """
         # Get parameters and save in database
         params: tuple = (
-            self.__params["simulation_name"], self.__params["simulation_speed"],
-            self.__params["display_size"],
-            self.__params["num_houses"], self.__params["num_offices"], self.__params["building_size"],
-            self.__params["num_people_in_house"],
-            self.__params["show_drawing"], self.__params["additional_roads"],
-            self.__params["infection_rate"], self.__params["incubation_time"],
-            self.__params["recovery_rate"], self.__params["mortality_rate"]
+            self.__config.simulation_name, self.__config.simulation_speed,
+            self.__config.display_size,
+            self.__config.num_houses, self.__config.num_offices, self.__config.building_size,
+            self.__config.num_people_in_house,
+            self.__config.show_drawing, self.__config.additional_roads,
+            self.__config.infection_rate, self.__config.incubation_time,
+            self.__config.recovery_rate, self.__config.mortality_rate
         )
         self.__sql_handler.save_params(params)
 
