@@ -2,6 +2,9 @@
 class SimulationError(Exception):
     pass
 
+class UsageError(Exception):
+    pass
+
 class ConfigError(SimulationError):
     pass
 
