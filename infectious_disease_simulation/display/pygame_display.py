@@ -9,8 +9,9 @@ Classes:
 """
 
 import pygame
+from .base_display import BaseDisplay
 
-class Display:
+class PygameDisplay(BaseDisplay):
     """
     A class which holds display properties, and pygame modules which manage the display window.
 
@@ -29,30 +30,19 @@ class Display:
             height (int): The height of the display.
             caption (str): The display window's caption.
         """
-        self.__width: int = width
-        self.__height: int = height
-        self.__caption: str = caption
-        self.__screen: pygame.Surface = pygame.display.set_mode((self.__width, self.__height))
+        super().__init__(width, height, caption)
+        self.__screen: pygame.Surface = pygame.display.set_mode((self._width, self._height))
         pygame.font.init()
         self.__font: pygame.font.Font = pygame.font.SysFont('Arial Bold', 25)
 
     def is_headless(self) -> bool:
         return False
 
-    def get_caption(self) -> str:
-        """
-        Returns the caption of the display.
-
-        Returns:
-            str: Caption of the display.
-        """
-        return self.__caption
-
     def set_caption(self) -> None:
         """
         Sets the caption of the display window.
         """
-        pygame.display.set_caption(self.__caption)
+        pygame.display.set_caption(self._caption)
 
     def fill(self, colour: tuple[int, int, int]) -> None:
         """
@@ -69,33 +59,6 @@ class Display:
         """
         pygame.display.update()
 
-    def get_width(self) -> int:
-        """
-        Returns the width of the display screen.
-
-        Returns:
-            int: Width of the display.
-        """
-        return self.__width
-
-    def get_height(self) -> int:
-        """
-        Returns the height of the display screen.
-
-        Returns:
-            int: Height of the display.
-        """
-        return self.__height
-
-    def get_screen(self) -> pygame.Surface:
-        """
-        Returns the display surface.
-
-        Returns:
-            pygame.Surface: The display surface created by pygame.
-        """
-        return self.__screen
-
     def set_display_icon(self, filepath: str) -> None:
         """
         Tries to set the display icon. Does nothing if the file does not exist.
@@ -108,6 +71,9 @@ class Display:
             pygame.display.set_icon(icon)
         except:
             pass
+    
+    def get_screen(self) -> pygame.Surface:
+        return self.__screen
 
     def draw_text(self, text: str, pos=(10, 10), colour=(0,0,0)) -> None:
         if not self.__font:
