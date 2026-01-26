@@ -18,7 +18,6 @@ Classes:
 import pygame
 import os
 from . import interface
-from . import sql_handler
 from . import display
 from . import create_map
 from . import disease
