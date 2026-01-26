@@ -58,4 +58,16 @@ class Config:
             raise ConfigError(f"'{ppl}'. Number of people per house must be a positive integer.")
 
         # additional checks - you can reuse current GUI validations or call them here
-        return Config(name, speed, ds, nh, no, bs, ppl, sd, ar, ir, inc, rec, mort)
+        return Config(simulation_name=name,
+                      simulation_speed=speed,
+                      display_size=ds,
+                      num_houses=nh,
+                      num_offices=no,
+                      building_size=bs,
+                      num_people_in_house=ppl,
+                      show_drawing=sd,
+                      additional_roads=ar,
+                      infection_rate=ir,
+                      incubation_time=inc,
+                      recovery_rate=rec,
+                      mortality_rate=mort)
