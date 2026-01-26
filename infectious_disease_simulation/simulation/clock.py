@@ -51,8 +51,6 @@ class Clock:
         self.__running: bool = True
         self.__seconds_per_hour: float = seconds_per_hour
         self.__fps: int = fps
-        pygame.font.init()
-        self.__font: pygame.font.Font = pygame.font.SysFont('Arial Bold', 25)
         self.__display: pygame_display.Display = display_obj
         self.__population: population.Population = population_obj
         self.__last_update: float = time.time()
@@ -105,8 +103,10 @@ class Clock:
         else:
             time_text: str = "Simulation Ended"
 
-        text_surface: pygame_display.Display = self.__font.render(time_text, True, (0, 0, 0))
-        self.__display.get_screen().blit(text_surface, (10, 10))
+        try:
+            self.__display.draw_text(time_text, pos=(10, 10), colour=(0,0,0))
+        except AttributeError:
+            pass
 
     def get_running(self) -> bool:
         """
