@@ -14,8 +14,10 @@ Classes:
 
 import tkinter as tk
 from tkinter import ttk, messagebox
-import sqlite3
 import math
+from .config import Config
+from .errors import ConfigError, DBError
+from .storage.db_handler import DBHandler
 
 class Interface:
     """
@@ -37,8 +39,11 @@ class Interface:
         self.__style.configure("TLabel", padding=6)
 
         self.__params: dict[str, any] = {}
+        self.__config: Config | None = None
 
-        self.__create_widgets(db_name)
+        self.__db_name: str = db_name
+
+        self.__create_widgets(self.__db_name)
         self.__root.protocol("WM_DELETE_WINDOW", self.__on_closing)
 
     def __create_widgets(self, db_name: str) -> None:
@@ -165,7 +170,7 @@ class Interface:
 
         # Run and Load Buttons
         ttk.Button(self.__root, text="Run Simulation", command=self.__submit).grid(row=6, column=0, pady=10)
-        ttk.Button(self.__root, text="Load Previous Run", command=lambda: self.__load_previous_run(db_name)).grid(row=6,
+        ttk.Button(self.__root, text="Load Previous Run", command=lambda: self.__load_previous_run(self.__db_name)).grid(row=6,
                                                                                                  column=1,
                                                                                                  pady=10)
 
@@ -300,6 +305,13 @@ class Interface:
                 "recovery_rate": recovery_rate,
                 "mortality_rate": mortality_rate
             }
+
+            try:
+                self.__config = Config.from_dict(self.__params)
+            except ConfigError as e:
+                messagebox.showerror("Configuration Error", str(e))
+                return
+
             self.__root.quit()
             self.__root.destroy()
 
@@ -363,32 +375,12 @@ class Interface:
         Args:
             db_name (str): The name of the database file.
         """
-        connection = sqlite3.connect(db_name)
-        cursor = connection.cursor()
-
-        # Exception handling for loading data
         try:
-            cursor.execute("""
-                        SELECT
-                           run_id,
-                           datetime,
-                           simulation_name,
-                           num_houses,
-                           num_offices,
-                           infection_rate,
-                           incubation_time,
-                           recovery_rate,
-                           mortality_rate
-                        FROM
-                           simulations
-                        ORDER BY
-                           run_id DESC""")
-        except sqlite3.OperationalError:
-            messagebox.showinfo("Load Previous Run", "No previous runs found.")
+            with DBHandler(self.__db_name) as db_handler:
+                rows: list[tuple] = db_handler.fetch_runs_summary()
+        except DBError as e:
+            messagebox.showerror("Database Error", str(e))
             return
-
-        rows = cursor.fetchall()
-        connection.close()
 
         # If empty database of previous runs
         if not rows:
@@ -438,8 +430,9 @@ class Interface:
             tree.insert("", "end", values=row)
 
         # Load button calls for loading selected run
-        ttk.Button(selection_window, text="Load",
-                   command=lambda: self.__load_selected_run(tree, selection_window, db_name)).grid(row=1,
+        ttk.Button(selection_window,
+                   text="Load",
+                   command=lambda: self.__load_selected_run(tree, selection_window, self.__db_name)).grid(row=1,
                                                                                           column=0,
                                                                                           padx=10,
                                                                                           pady=10)
@@ -462,7 +455,7 @@ class Interface:
             return
 
         run_id = tree.item(selected_item)["values"][0]
-        self.__load_run(run_id, selection_window, db_name)
+        self.__load_run(run_id, selection_window, self.__db_name)
 
     def __load_run(self, run_id: int, selection_window: tk.Toplevel, db_name: str) -> None:
         """
@@ -473,11 +466,12 @@ class Interface:
             selection_window (tk.Toplevel): The window for selecting the previous run.
             db_name (str): The name of the database file.
         """
-        connection = sqlite3.connect(db_name)
-        cursor = connection.cursor()
-        cursor.execute("SELECT * FROM simulations WHERE run_id=?", (run_id,))
-        row = cursor.fetchone()
-        connection.close()
+        try:
+            with DBHandler(self.__db_name) as db_handler:
+                row: tuple = db_handler.fetch_run(run_id)
+        except DBError as e:
+            messagebox.showerror("Database Error", str(e))
+            return
 
         # Delete previous values and insert loaded values
         if row:
@@ -488,30 +482,35 @@ class Interface:
              num_people_in_house,
              show_drawing, additional_roads,
              infection_rate, incubation_time, recovery_rate, mortality_rate) = row
-            self.__params["simulation_name"].delete(0, tk.END)
-            self.__params["simulation_name"].insert(0, simulation_name)
-            self.__params["display_size"].delete(0, tk.END)
-            self.__params["display_size"].insert(0, display_size)
-            self.__params["num_houses"].delete(0, tk.END)
-            self.__params["num_houses"].insert(0, num_houses)
-            self.__params["num_offices"].delete(0, tk.END)
-            self.__params["num_offices"].insert(0, num_offices)
-            self.__params["building_size"].delete(0, tk.END)
-            self.__params["building_size"].insert(0, building_size)
-            self.__params["num_people_in_house"].delete(0, tk.END)
-            self.__params["num_people_in_house"].insert(0, num_people_in_house)
+
+            loaded = {
+                "simulation_name": simulation_name,
+                "display_size": display_size,
+                "num_houses": num_houses,
+                "num_offices": num_offices,
+                "building_size": building_size,
+                "num_people_in_house": num_people_in_house,
+                "infection_rate": infection_rate,
+                "incubation_time": incubation_time,
+                "recovery_rate": recovery_rate,
+                "mortality_rate": mortality_rate,
+            }
+
+            for key, value in loaded.items():
+                widget = self.__params[key]
+                widget.delete(0, tk.END)
+                widget.insert(0, value)
+
             self.__simulation_speed.set(simulation_speed)
             self.__update_speed_label(simulation_speed)
             self.__show_drawing.set(show_drawing)
             self.__additional_roads.set(additional_roads)
-            self.__params["infection_rate"].delete(0, tk.END)
-            self.__params["infection_rate"].insert(0, infection_rate)
-            self.__params["incubation_time"].delete(0, tk.END)
-            self.__params["incubation_time"].insert(0, incubation_time)
-            self.__params["recovery_rate"].delete(0, tk.END)
-            self.__params["recovery_rate"].insert(0, recovery_rate)
-            self.__params["mortality_rate"].delete(0, tk.END)
-            self.__params["mortality_rate"].insert(0, mortality_rate)
+
+            self.__config = Config.from_dict(loaded | {
+                "simulation_speed": simulation_speed,
+                "show_drawing": show_drawing,
+                "additional_roads": additional_roads,
+            })
 
         selection_window.destroy() # Close selection window
 
@@ -524,3 +523,12 @@ class Interface:
         """
         self.__root.mainloop()
         return self.__params
+
+    def get_config(self) -> Config | None:
+        """
+        Returns the Config object containing the simulation parameters.
+
+        Returns:
+            Config | None: The Config object or None if parameters were not set.
+        """
+        return self.__config
