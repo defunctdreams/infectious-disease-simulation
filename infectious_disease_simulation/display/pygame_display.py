@@ -33,6 +33,8 @@ class Display:
         self.__height: int = height
         self.__caption: str = caption
         self.__screen: pygame.Surface = pygame.display.set_mode((self.__width, self.__height))
+        pygame.font.init()
+        self.__font: pygame.font.Font = pygame.font.SysFont('Arial Bold', 25)
 
     def get_caption(self) -> str:
         """
@@ -103,3 +105,9 @@ class Display:
             pygame.display.set_icon(icon)
         except:
             pass
+
+    def draw_text(self, text: str, pos=(10, 10), colour=(0,0,0)) -> None:
+        if not self.__font:
+            return
+        surface = self.__font.render(text, True, colour)
+        self.__screen.blit(surface, pos)
