@@ -15,7 +15,7 @@ import random
 import numpy as np
 import pygame
 from . import buildings
-from .. import display # For typing
+from .. import display
 
 class Tilemap:
     """
