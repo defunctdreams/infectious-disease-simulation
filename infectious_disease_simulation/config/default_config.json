@@ -1,0 +1,15 @@
+{
+  "simulation_name": "default_config_headless",
+  "simulation_speed": 5,
+  "display_size": 800,
+  "num_houses": 75,
+  "num_offices": 25,
+  "building_size": 50,
+  "num_people_in_house": 4,
+  "show_drawing": false,
+  "additional_roads": false,
+  "infection_rate": 0.7,
+  "incubation_time": 2.0,
+  "recovery_rate": 0.6,
+  "mortality_rate": 0.1
+}
