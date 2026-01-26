@@ -17,7 +17,7 @@ Classes:
 
 import pygame
 import os
-from .ui import interface
+from .ui.interface import Interface
 from . import display
 from . import create_map
 from . import disease
@@ -53,16 +53,12 @@ class Main:
         db_name: str = self.__get_db_name()
 
         # Initialise interface and get parameters
-        self.__interface: interface.Interface = interface.Interface(db_name)
-        params: dict[str, any] = self.__interface.get_params()
-        if params is None: # If window closed
-            return
-        
-        try:
-            self.__config: Config = Config.from_dict(params)
-        except ConfigError as e:
-            print(f"Configuration Error: {e}")
-            return
+        ui = Interface(db_name)
+        self.__config = ui.get_config()
+
+        if self.__config is None:
+            return  # User closed the window
+
 
         # Initialise class to handle SQL queries
         try:
@@ -116,33 +112,6 @@ class Main:
         # Run simulation
         print("Running Simulation...")
         self.__run_simulation()
-
-    def __none_params(self) -> bool:
-        """
-        Checks if the parameters are None.
-
-        Returns:
-            bool: True if parameters are None, False otherwise.
-        """
-        if self.__params is None:
-            return True
-        return False
-
-    def __save_params(self) -> None:
-        """
-        Saves the parameters to the database using SQLHandler.
-        """
-        # Get parameters and save in database
-        params: tuple = (
-            self.__config.simulation_name, self.__config.simulation_speed,
-            self.__config.display_size,
-            self.__config.num_houses, self.__config.num_offices, self.__config.building_size,
-            self.__config.num_people_in_house,
-            self.__config.show_drawing, self.__config.additional_roads,
-            self.__config.infection_rate, self.__config.incubation_time,
-            self.__config.recovery_rate, self.__config.mortality_rate
-        )
-        self.__sql_handler.save_params(params)
 
     def __initialise_display(self) -> None:
         """
