@@ -39,7 +39,7 @@ class Config:
         except Exception as e:
             raise ConfigError(f"Invalid configuration: {e}")
 
-        # boundary checks
+        # Validation checks
         if not (0 <= ir <= 1):
             raise ConfigError(f"'{ir}', infection_rate must be between 0 and 1")
         if inc < 0:
@@ -49,11 +49,13 @@ class Config:
         if not (0 <= mort <= 1):
             raise ConfigError(f"'{mort}'. mortality_rate must be between 0 and 1")
         if bs <= 0:
-            raise ConfigError(f"'{bs}'. building_size must be a positive integer")
+            raise ConfigError(f"'{bs}'. Building size must be a positive integer.")
         if nh <= 0 or no <= 0:
-            raise ConfigError(f"Number of houses and offices must be positive integers")
+            raise ConfigError("There must be at least one house and office.")
         if nh + no > (ds // bs) ** 2:
             raise ConfigError("Number of buildings greater than the number of possible locations.")
+        if ppl <= 0:
+            raise ConfigError(f"'{ppl}'. Number of people per house must be a positive integer.")
 
         # additional checks - you can reuse current GUI validations or call them here
         return Config(name, speed, ds, nh, no, bs, ppl, sd, ar, ir, inc, rec, mort)
