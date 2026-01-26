@@ -230,27 +230,29 @@ class Interface:
                 raise ValueError(f"'{display_size}'. Display size must be a positive integer.")
             if display_size > 2160: # 4K display height
                 raise ValueError(f"'{display_size}'. Display size too large. Maximum display size is 2160 pixels.")
-            if building_size <= 0:
-                raise ValueError(f"'{building_size}'. Building size must be a positive integer.")
-            if num_houses <= 0 or num_offices <= 0:
-                raise ValueError("There must be at least one house and office.")
-            if num_houses + num_offices > (display_size // building_size) ** 2:
-                raise ValueError("Number of buildings greater than the number of possible locations.\n"
-                                 "Increase the display size or decrease the building size or the number of houses/offices.")
-            if num_people_in_house <= 0:
-                raise ValueError(f"'{num_people_in_house}'. Number of people per house must be a positive integer.")
-            if ((building_size // 10 < 1) or
-            (building_size // (2 * (math.ceil(math.sqrt(num_people_in_house)) + 1)) < 1) or
-            (building_size // (2 * (math.ceil(math.sqrt((num_people_in_house * num_houses) // num_offices)) + 1)) < 1)):
-                raise ValueError("Population size too large and/or Building size too small for people to be seen.")
-            if infection_rate > 1 or infection_rate < 0:
-                raise ValueError(f"'{infection_rate}'. Infection rate must be a decimal between 0 and 1.")
-            if incubation_time < 0:
-                raise ValueError(f"'{incubation_time}'. Incubation time cannot be less than 0 days.")
-            if recovery_rate > 1 or recovery_rate < 0:
-                raise ValueError(f"'{recovery_rate}'. Recovery rate must be a decimal between 0 and 1.")
-            if mortality_rate > 1 or mortality_rate < 0:
-                raise ValueError(f"'{mortality_rate}'. Mortality rate must be a decimal between 0 and 1.")
+
+            # Build raw dict
+            raw = {
+                "simulation_name": simulation_name,
+                "simulation_speed": simulation_speed,
+                "display_size": display_size,
+                "num_houses": num_houses,
+                "num_offices": num_offices,
+                "building_size": building_size,
+                "num_people_in_house": num_people_in_house,
+                "show_drawing": show_drawing,
+                "additional_roads": additional_roads,
+                "infection_rate": infection_rate,
+                "incubation_time": incubation_time,
+                "recovery_rate": recovery_rate,
+                "mortality_rate": mortality_rate
+            }
+
+            try:
+                self.__config = Config.from_dict(raw)
+            except ConfigError as e:
+                messagebox.showerror("Configuration Error", str(e))
+                return
 
             # Warning for large population
             if num_people_in_house * num_houses >= 1000:
@@ -290,29 +292,20 @@ class Interface:
                 )
                 if not proceed_no_sim_end:
                     return
-
-            # Set validated parameters
-            self.__params = {
-                "simulation_name": simulation_name,
-                "simulation_speed": simulation_speed,
-                "display_size": display_size,
-                "num_houses": num_houses,
-                "num_offices": num_offices,
-                "building_size": building_size,
-                "num_people_in_house": num_people_in_house,
-                "show_drawing": show_drawing,
-                "additional_roads": additional_roads,
-                "infection_rate": infection_rate,
-                "incubation_time": incubation_time,
-                "recovery_rate": recovery_rate,
-                "mortality_rate": mortality_rate
-            }
-
-            try:
-                self.__config = Config.from_dict(self.__params)
-            except ConfigError as e:
-                messagebox.showerror("Configuration Error", str(e))
-                return
+                
+            # Warning for people too small to being visible
+            if ((building_size // 10 < 1) or
+            (building_size // (2 * (math.ceil(math.sqrt(num_people_in_house)) + 1)) < 1) or
+            (building_size // (2 * (math.ceil(math.sqrt((num_people_in_house * num_houses) // num_offices)) + 1)) < 1)):
+                proceed_no_sim_end: bool = messagebox.askokcancel(
+                    "Warning",
+                    "Population size too large and/or building size too small for people to be seen.\n"
+                    "Proceed?",
+                    icon='warning',
+                    default='cancel'
+                )
+                if not proceed_no_sim_end:
+                    return
 
             self.__root.quit()
             self.__root.destroy()
