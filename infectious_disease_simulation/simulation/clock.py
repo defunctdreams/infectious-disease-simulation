@@ -14,7 +14,7 @@ Classes:
 
 import time
 import pygame
-from .. import display # For typing
+from ..display import pygame_display # For typing
 from ..simulation import population # For typing
 from ..viz import plot_graph
 
@@ -34,7 +34,7 @@ class Clock:
         __last_update (float): The last time the simulation was updated.
         __graph (plot_graph.PlotGraph): The graph to display simulation data.
     """
-    def __init__(self, display_obj: display.Display,
+    def __init__(self, display_obj: pygame_display.Display,
                  population_obj: population.Population,
                  seconds_per_hour: float, fps: int) -> None:
         """
@@ -53,7 +53,7 @@ class Clock:
         self.__fps: int = fps
         pygame.font.init()
         self.__font: pygame.font.Font = pygame.font.SysFont('Arial Bold', 25)
-        self.__display: display.Display = display_obj
+        self.__display: pygame_display.Display = display_obj
         self.__population: population.Population = population_obj
         self.__last_update: float = time.time()
         self.__graph: plot_graph.PlotGraph = plot_graph.PlotGraph(self.__display.get_caption(), self.__fps)
@@ -105,7 +105,7 @@ class Clock:
         else:
             time_text: str = "Simulation Ended"
 
-        text_surface: display.Display = self.__font.render(time_text, True, (0, 0, 0))
+        text_surface: pygame_display.Display = self.__font.render(time_text, True, (0, 0, 0))
         self.__display.get_screen().blit(text_surface, (10, 10))
 
     def get_running(self) -> bool:

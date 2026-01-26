@@ -10,7 +10,7 @@ Imports:
 Classes:
     CreateMap
 """
-from .. import display
+from ..display import pygame_display
 from . import tilemap
 from . import roads
 
@@ -25,7 +25,7 @@ class CreateMap:
         __tilemap (tilemap.Tilemap): The Tilemap object that manages placing and drawing the buildings on the map.
         __roads (roads.Roads): The Roads object that manages and draws roads on the map.
     """
-    def __init__(self, display_obj: display.Display,
+    def __init__(self, display_obj: pygame_display.Display,
                  num_houses: int, num_offices: int,
                  building_width: int, building_height: int) -> None:
         """
@@ -40,7 +40,7 @@ class CreateMap:
         """
         self.__building_width: int = building_width
         self.__building_height: int = building_height
-        self.__display: display.Display = display_obj
+        self.__display: pygame_display.Display = display_obj
         print("Generating Tilemap...")
         self.__tilemap: tilemap.Tilemap = tilemap.Tilemap(self.__display,
                                                           num_houses, num_offices,

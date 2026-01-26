@@ -15,7 +15,7 @@ import random
 import numpy as np
 import pygame
 from . import buildings
-from .. import display
+from ..display import pygame_display
 
 class Tilemap:
     """
@@ -37,7 +37,7 @@ class Tilemap:
         __current_houses (int): Current number of houses placed on the tilemap, initialised to 0.
         __current_offices (int): Current number of offices placed on the tilemap, initialised to 0.
     """
-    def __init__(self, display_obj: display.Display,
+    def __init__(self, display_obj: pygame_display.Display,
                  num_houses: int, num_offices: int,
                  building_width: int, building_height: int) -> None:
         """
@@ -50,7 +50,7 @@ class Tilemap:
             building_width (int): The width of each building in the tilemap.
             building_height (int): The height of each building in the tilemap.
         """
-        self.__display: display.Display = display_obj
+        self.__display: pygame_display.Display = display_obj
         self.__building_width: int = building_width
         self.__building_height: int = building_height
         self.__size: tuple[int, int] = (int(self.__display.get_width() / building_width),

@@ -17,7 +17,7 @@ Classes:
 
 import random
 import math
-from .. import display # For typing
+from ..display import pygame_display # For typing
 from ..world import tilemap # For typing
 from ..world import create_map # For typing
 from ..simulation import disease # For typing
@@ -43,7 +43,7 @@ class InitialisePeople:
         __people (list[person.Person]): The list of Person objects initialised.
     """
     def __init__(self, num_in_house: int,
-                 display_obj: display.Display, map_obj: create_map.CreateMap, disease_obj: disease.Disease,
+                 display_obj: pygame_display.Display, map_obj: create_map.CreateMap, disease_obj: disease.Disease,
                  seconds_per_hour: float, fps: int) -> None:
         """
         Initialises the InitialisePeople class with the given parameters.
@@ -56,7 +56,7 @@ class InitialisePeople:
             seconds_per_hour (float): The number of seconds per simulation hour.
             fps (int): The frames per second for the simulation.
         """
-        self.__display: display.Display = display_obj
+        self.__display: pygame_display.Display = display_obj
         self.__map: create_map.CreateMap = map_obj
         self.__tilemap: tilemap.Tilemap = self.__map.get_tilemap()
         self.__disease: disease.Disease = disease_obj

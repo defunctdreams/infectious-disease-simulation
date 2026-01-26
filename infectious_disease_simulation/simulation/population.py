@@ -15,7 +15,7 @@ Classes:
 """
 import math
 from . import initialise_people
-from .. import display # For typing
+from ..display import pygame_display # For typing
 from ..world import create_map # For typing
 from ..world import tilemap # For typing
 from ..simulation import disease # For typing
@@ -37,7 +37,7 @@ class Population:
         __route_intersections (dict[int, list[person.Person]]): The dictionary of route intersections for each person.
     """
     def __init__(self, num_in_house: int,
-                 display_obj: display.Display,
+                 display_obj: pygame_display.Display,
                  map_obj: create_map.CreateMap,
                  disease_obj: disease.Disease,
                  seconds_per_hour: int, fps: int) -> None:
@@ -52,7 +52,7 @@ class Population:
             seconds_per_hour (int): The number of seconds per simulation hour.
             fps (int): The frames per second for the simulation.
         """
-        self.__display: display.Display = display_obj
+        self.__display: pygame_display.Display = display_obj
         self.__map: create_map.CreateMap = map_obj
         self.__tilemap: tilemap.Tilemap = self.__map.get_tilemap()
         self.__num_in_house: int = num_in_house

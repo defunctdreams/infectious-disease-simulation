@@ -12,7 +12,7 @@ Classes:
 """
 import math
 import pygame
-from .. import display # For typing
+from ..display import pygame_display # For typing
 from ..simulation import disease # For typing
 
 class Person:
@@ -42,7 +42,7 @@ class Person:
         __incubation_time (float): The incubation time remaining for the person before becoming infectious.
         __seconds_per_hour (float): The number of seconds per simulation hour.
     """
-    def __init__(self, display_obj: display.Display,
+    def __init__(self, display_obj: pygame_display.Display,
                  person_id: int,
                  home_location: tuple[int, int], office_location: tuple[int, int], home_position: tuple[int, int],
                  home_radius: int, office_radius: int,
@@ -69,7 +69,7 @@ class Person:
             incubation_time (float): The incubation time for the disease.
             seconds_per_hour (float): The number of seconds per simulation hour.
         """
-        self.__display: display.Display = display_obj
+        self.__display: pygame_display.Display = display_obj
         self.__person_id: int = person_id
         self.__home_location: tuple[int, int] = home_location
         self.__office_location: tuple[int, int] = office_location
