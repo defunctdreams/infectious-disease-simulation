@@ -10,7 +10,7 @@ Imports:
 Classes:
     CreateMap
 """
-from . import display
+from .. import display
 from . import tilemap
 from . import roads
 

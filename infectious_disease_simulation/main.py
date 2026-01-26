@@ -19,10 +19,10 @@ import pygame
 import os
 from .ui.interface import Interface
 from . import display
-from . import create_map
-from . import disease
-from . import population
-from . import clock
+from .world import create_map
+from .simulation import disease
+from .simulation import population
+from .simulation import clock
 from .config import Config
 from .errors import ConfigError, DBError
 from .storage.db_handler import DBHandler

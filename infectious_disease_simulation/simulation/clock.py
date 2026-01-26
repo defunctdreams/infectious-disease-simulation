@@ -14,9 +14,9 @@ Classes:
 
 import time
 import pygame
-from . import display # For typing
-from . import population # For typing
-from . import plot_graph
+from .. import display # For typing
+from ..simulation import population # For typing
+from ..viz import plot_graph
 
 class Clock:
     """

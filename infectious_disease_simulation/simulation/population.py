@@ -15,11 +15,11 @@ Classes:
 """
 import math
 from . import initialise_people
-from . import display # For typing
-from . import create_map # For typing
-from . import tilemap # For typing
-from . import disease # For typing
-from . import person # For typing
+from .. import display # For typing
+from ..world import create_map # For typing
+from ..world import tilemap # For typing
+from ..simulation import disease # For typing
+from ..agents import person # For typing
 
 class Population:
     """

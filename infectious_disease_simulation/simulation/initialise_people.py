@@ -17,12 +17,12 @@ Classes:
 
 import random
 import math
-from . import display # For typing
-from . import tilemap # For typing
-from . import create_map # For typing
-from . import disease # For typing
-from . import person
-from . import dijkstra
+from .. import display # For typing
+from ..world import tilemap # For typing
+from ..world import create_map # For typing
+from ..simulation import disease # For typing
+from ..agents import person
+from ..agents import dijkstra
 
 class InitialisePeople:
     """

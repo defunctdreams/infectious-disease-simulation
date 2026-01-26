@@ -13,7 +13,7 @@ Classes:
 
 import math
 import numpy as np
-from . import create_graph
+from ...world.graph import create_graph
 from . import additional_connections
 
 class MST:

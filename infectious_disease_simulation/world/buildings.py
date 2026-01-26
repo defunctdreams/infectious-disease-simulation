@@ -11,7 +11,7 @@ Classes:
     Office
 """
 from abc import ABC, abstractmethod
-from . import person # For typing
+from ..agents import person # For typing
 
 class Building(ABC):
     """

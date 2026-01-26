@@ -12,8 +12,8 @@ Classes:
 """
 import math
 import pygame
-from . import display # For typing
-from . import disease # For typing
+from .. import display # For typing
+from ..simulation import disease # For typing
 
 class Person:
     """
