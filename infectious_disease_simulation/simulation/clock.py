@@ -54,8 +54,9 @@ class Clock:
         self.__display: Display = display_obj
         self.__population: population.Population = population_obj
         self.__last_update: float = time.time()
-        self.__graph: plot_graph.PlotGraph = plot_graph.PlotGraph(self.__display.get_caption(), self.__fps)
-        self.__graph.update(self.__day, self.__hour, self.__population.get_status_counts())
+        if not self.__display.is_headless():
+            self.__graph: plot_graph.PlotGraph = plot_graph.PlotGraph(self.__display.get_caption(), self.__fps)
+            self.__graph.update(self.__day, self.__hour, self.__population.get_status_counts())
 
     def update_time(self) -> None:
         """
@@ -67,7 +68,8 @@ class Clock:
         if not self.__population.has_active_infections(): # If no infections, update graph and stop running
             self.__population.update_infection_status()
             counts = self.__population.get_status_counts()
-            self.__graph.update(self.__day, self.__hour, counts)
+            if not self.__display.is_headless():
+                self.__graph.update(self.__day, self.__hour, counts)
             self.__running = False
             return
 
@@ -79,7 +81,8 @@ class Clock:
             self.__population.update_infection_status() # Update infections
 
             counts = self.__population.get_status_counts()
-            self.__graph.update(self.__day, self.__hour, counts) # Update graph with current population status
+            if not self.__display.is_headless():
+                self.__graph.update(self.__day, self.__hour, counts) # Update graph with current population status
 
             if self.__hour > 24: # Change day
                 self.__hour = 1
