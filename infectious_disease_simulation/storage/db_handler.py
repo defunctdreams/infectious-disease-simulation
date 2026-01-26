@@ -23,7 +23,7 @@ class DBHandler:
         except sqlite3.Error as e:
             raise DBError(f"Database connection error: {e}")  # NEW
 
-    def __exit__(self, exc_type, exc, tb) -> None:
+    def __exit__(self) -> None:
         if self.conn:
             self.conn.close()
             self.conn = None
@@ -101,34 +101,64 @@ class DBHandler:
         Columns: run_id, datetime, simulation_name, num_houses, num_offices,
                  infection_rate, incubation_time, recovery_rate, mortality_rate
         """
-        query = """
-        SELECT
-            run_id,
-            datetime,
-            simulation_name,
-            num_houses,
-            num_offices,
-            infection_rate,
-            incubation_time,
-            recovery_rate,
-            mortality_rate
-        FROM simulations
-        ORDER BY run_id DESC
-        """
         try:
             assert self.conn is not None
             cur = self.conn.cursor()
-            cur.execute(query)
-            return cur.fetchall()
-        except sqlite3.Error as e:
-            raise DBError(f"Error fetching runs summary: {e}")  # NEW
+            cur.execute("""
+                SELECT run_id, datetime, simulation_name,
+                    num_houses, num_offices,
+                    infection_rate, incubation_time,
+                    recovery_rate, mortality_rate
+                FROM simulations
+                ORDER BY datetime DESC
+            """)
+            rows = cur.fetchall()
 
-    def fetch_run(self, run_id: int) -> Optional[Tuple]:
-        """Return the full row for a given run_id, or None if not found."""
+            summaries = []
+            for row in rows:
+                summaries.append({
+                    "run_id": row[0],
+                    "datetime": row[1],
+                    "simulation_name": row[2],
+                    "num_houses": row[3],
+                    "num_offices": row[4],
+                    "infection_rate": row[5],
+                    "incubation_time": row[6],
+                    "recovery_rate": row[7],
+                    "mortality_rate": row[8],
+                })
+
+            return summaries
+
+        except sqlite3.Error as e:
+            raise DBError(f"Error fetching run summaries: {e}")
+
+    def fetch_run(self, run_id: int) -> Optional[dict]:
+        """Return a dict of run parameters for a given run_id, or None if not found."""
         try:
             assert self.conn is not None
             cur = self.conn.cursor()
             cur.execute("SELECT * FROM simulations WHERE run_id = ?", (run_id,))
-            return cur.fetchone()
+            row = cur.fetchone()
+            if row is None:
+                return None
+
+            # Map tuple → dict
+            return {
+                "simulation_name": row[2],
+                "simulation_speed": row[3],
+                "display_size": row[4],
+                "num_houses": row[5],
+                "num_offices": row[6],
+                "building_size": row[7],
+                "num_people_in_house": row[8],
+                "show_drawing": row[9],
+                "additional_roads": row[10],
+                "infection_rate": row[11],
+                "incubation_time": row[12],
+                "recovery_rate": row[13],
+                "mortality_rate": row[14],
+            }
+
         except sqlite3.Error as e:
-            raise DBError(f"Error fetching run {run_id}: {e}")  # NEW
+            raise DBError(f"Error fetching run {run_id}: {e}")
