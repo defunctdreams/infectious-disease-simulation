@@ -14,7 +14,7 @@ Classes:
 
 import time
 import pygame
-from ..display import pygame_display # For typing
+from ..display import Display # For typing
 from ..simulation import population # For typing
 from ..viz import plot_graph
 
@@ -34,7 +34,7 @@ class Clock:
         __last_update (float): The last time the simulation was updated.
         __graph (plot_graph.PlotGraph): The graph to display simulation data.
     """
-    def __init__(self, display_obj: pygame_display.Display,
+    def __init__(self, display_obj: Display,
                  population_obj: population.Population,
                  seconds_per_hour: float, fps: int) -> None:
         """
@@ -51,7 +51,7 @@ class Clock:
         self.__running: bool = True
         self.__seconds_per_hour: float = seconds_per_hour
         self.__fps: int = fps
-        self.__display: pygame_display.Display = display_obj
+        self.__display: Display = display_obj
         self.__population: population.Population = population_obj
         self.__last_update: float = time.time()
         self.__graph: plot_graph.PlotGraph = plot_graph.PlotGraph(self.__display.get_caption(), self.__fps)

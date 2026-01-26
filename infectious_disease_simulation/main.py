@@ -17,8 +17,9 @@ Classes:
 
 import pygame
 import os
+import sys
 from .ui.interface import Interface
-from .display import pygame_display
+from .display import Display
 from .world import create_map
 from .simulation import disease
 from .simulation import population
@@ -49,6 +50,10 @@ class Main:
         Initialises the Main class, sets up interface, parameters, display, map, disease, population, and clock.
         Runs the simulation if parameters are valid.
         """
+        headless = "--headless" in sys.argv
+        if headless:
+            sys.argv.remove("--headless")
+
         # Pulls database name
         db_name: str = self.__get_db_name()
 
@@ -73,9 +78,10 @@ class Main:
         self.__fps: int = 60
 
         # Initialise display with parameters
-        self.__display: pygame_display.Display = pygame_display.Display(self.__config.display_size,
-                                                          self.__config.display_size,
-                                                          self.__config.simulation_name)
+        self.__display: Display = Display(self.__config.display_size,
+                                          self.__config.display_size,
+                                          self.__config.simulation_name,
+                                          headless)
         self.__initialise_display()
 
         # Create a separate surface for the map, intialise and draw map with parameters

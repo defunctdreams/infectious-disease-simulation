@@ -12,7 +12,7 @@ Classes:
 """
 import pygame
 import numpy as np
-from ..display import pygame_display # For typing
+from ..display import Display # For typing
 from .graph import mst
 
 class Roads:
@@ -28,7 +28,7 @@ class Roads:
         __mst_dict (dict[tuple[int, int], list[tuple[tuple[int, int], int]]]): Dictionary containing the roads.
     """
     def __init__(self,
-                 display_obj: pygame_display.Display,
+                 display_obj: Display,
                  map_array: np.ndarray,
                  building_width: int, building_height: int,
                  additional_roads: bool) -> None:
@@ -42,7 +42,7 @@ class Roads:
             building_height (int): The height of each building in the tilemap.
             additional_roads (bool): True if additional roads to be included.
         """
-        self.__display: pygame_display.Display = display_obj
+        self.__display: Display = display_obj
         self.__map: np.ndarray = map_array
         self.__building_width: int = building_width
         self.__building_height: int = building_height
