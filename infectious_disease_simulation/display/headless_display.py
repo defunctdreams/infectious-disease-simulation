@@ -13,6 +13,9 @@ class Display:
         # Dummy surface so pygame.draw.* still works if called
         self.__screen = pygame.Surface((width, height))
 
+    def is_headless(self) -> bool:
+        return True
+
     def get_caption(self) -> str:
         return self.__caption
 

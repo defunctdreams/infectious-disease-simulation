@@ -36,6 +36,9 @@ class Display:
         pygame.font.init()
         self.__font: pygame.font.Font = pygame.font.SysFont('Arial Bold', 25)
 
+    def is_headless(self) -> bool:
+        return False
+
     def get_caption(self) -> str:
         """
         Returns the caption of the display.
