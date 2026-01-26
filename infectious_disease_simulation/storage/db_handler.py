@@ -23,7 +23,7 @@ class DBHandler:
         except sqlite3.Error as e:
             raise DBError(f"Database connection error: {e}")  # NEW
 
-    def __exit__(self) -> None:
+    def __exit__(self, exc_type, exc, tb) -> None:
         if self.conn:
             self.conn.close()
             self.conn = None
