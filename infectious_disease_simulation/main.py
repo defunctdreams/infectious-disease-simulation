@@ -18,6 +18,7 @@ Classes:
 import pygame
 import os
 import sys
+import json
 from .ui.interface import Interface
 from .display import Display
 from .world import create_map
@@ -25,7 +26,7 @@ from .simulation import disease
 from .simulation import population
 from .simulation import clock
 from .config import Config
-from .errors import ConfigError, DBError
+from .errors import ConfigError, DBError, UsageError
 from .storage.db_handler import DBHandler
 
 class Main:
@@ -50,19 +51,36 @@ class Main:
         Initialises the Main class, sets up interface, parameters, display, map, disease, population, and clock.
         Runs the simulation if parameters are valid.
         """
-        headless = "--headless" in sys.argv
-        if headless:
-            sys.argv.remove("--headless")
+        args = sys.argv[1:]
+        self.__headless = "--headless" in args
+        if self.__headless:
+            args.remove("--headless")
+
+        # If in headless mode, next argument must be config file path
+        config_path: str | None = None
+        if self.__headless:
+            try:
+                if len(args) == 0:
+                    raise UsageError("\n--headless flag used but no config file provided.\nFlag usage: --headless <config_file_path>")
+                elif len(args) > 1:
+                    raise UsageError("\nToo many arguments provided.\nFlag usage: --headless <config_file_path>")
+            except UsageError as e:
+                print(e)
+                return
+            config_path = args[0]
 
         # Pulls database name
         db_name: str = self.__get_db_name()
 
-        # Initialise interface and get parameters
-        ui = Interface(db_name)
-        self.__config = ui.get_config()
+        if self.__headless:
+            self.__config = self.__load_config_file(config_path)
+        else:
+            # Initialise interface and get parameters
+            ui = Interface(db_name)
+            self.__config = ui.get_config()
 
-        if self.__config is None:
-            return  # User closed the window
+            if self.__config is None:
+                return  # User closed the window
 
 
         # Initialise class to handle SQL queries
@@ -81,7 +99,7 @@ class Main:
         self.__display: Display = Display(self.__config.display_size,
                                           self.__config.display_size,
                                           self.__config.simulation_name,
-                                          headless)
+                                          self.__headless)
         self.__initialise_display()
 
         # Create a separate surface for the map, intialise and draw map with parameters
@@ -119,6 +137,16 @@ class Main:
         print("Running Simulation...")
         self.__run_simulation()
 
+    def __load_config_file(self, path: str) -> Config:
+        try:
+            with open(path) as f:
+                data = json.load(f)
+                print(data)
+            return Config(**data)
+        except FileNotFoundError:
+            print(f"Configuration file not found at: {path}")
+            sys.exit()
+
     def __initialise_display(self) -> None:
         """
         Initialises the display by setting the caption, filling the background, and setting the display icon.
@@ -146,6 +174,9 @@ class Main:
                 self.__population.update_positions() # Update people's positions
                 self.__display.get_screen().blit(self.__map_surface, (0, 0)) # Map surface as 'background'
                 self.__population.draw_people() # Draw people
+            else:
+                if self.__headless:
+                    running = False
             
             self.__clock.display_time() # Draw the clock on top
             self.__display.update()
