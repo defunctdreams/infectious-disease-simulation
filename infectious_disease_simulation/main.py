@@ -17,7 +17,7 @@ Classes:
 
 import pygame
 import os
-from . import interface
+from .ui import interface
 from . import display
 from . import create_map
 from . import disease
