@@ -63,6 +63,7 @@ class InitialisePeople:
         self.__num_in_house: int = num_in_house
         self.__seconds_per_hour: float = seconds_per_hour
         self.__fps: int = fps
+        self.__delta_time: float = 1 / self.__fps
         self.__roads: dict[tuple[int, int], list[tuple[tuple[int, int], int]]] = self.__map.get_roads()
         self.__building_width: int = self.__tilemap.get_building_width()
         self.__building_height: int = self.__tilemap.get_building_height()
@@ -113,7 +114,7 @@ class InitialisePeople:
                                        home_radius, office_radius,
                                        home_to_office_route, speed, leave_home, status,
                                        self.__disease, self.__disease.get_incubation_time(),
-                                       self.__seconds_per_hour)
+                                       self.__seconds_per_hour, self.__delta_time)
 
             self.__tilemap.get_home_from_location(home_location).add_occupant(individual)
             self.__tilemap.get_office_from_location(office_location).add_occupant(individual)

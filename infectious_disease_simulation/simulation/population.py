@@ -59,6 +59,7 @@ class Population:
         self.__disease: disease.Disease = disease_obj
         self.__seconds_per_hour: int = seconds_per_hour
         self.__fps: int = fps
+        self.__delta_time: float = 1 / self.__fps
         self.__people: initialise_people.InitialisePeople = initialise_people.InitialisePeople(self.__num_in_house,
                                                                                                self.__display,
                                                                                                self.__map,
@@ -210,7 +211,7 @@ class Population:
                 if (other.get_status() == "S" and
                     self.__calculate_distance(individual.get_current_position(),
                                               other.get_current_position()) <= 2 * individual.get_radius()):
-                    if self.__disease.infect():
+                    if self.__disease.infect(self.__delta_time):
                         other.set_status("E")
 
     def __check_building_interactions(self) -> None:
@@ -229,7 +230,7 @@ class Population:
 
                 # Chance of those in same building getting infected
                 for occupant in occupants:
-                    if occupant.get_status() == "S" and self.__disease.infect():
+                    if occupant.get_status() == "S" and self.__disease.infect(self.__delta_time):
                         occupant.set_status("E")
 
     def __calculate_distance(self, pos1: tuple[int, int], pos2: tuple[int, int]) -> float:

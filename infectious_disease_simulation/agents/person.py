@@ -49,7 +49,7 @@ class Person:
                  home_to_office_route: list[tuple[int, int]],
                  speed: float, leave_home: int, status: str,
                  disease_obj: disease.Disease, incubation_time: float,
-                 seconds_per_hour: float) -> None:
+                 seconds_per_hour: float, delta_time: float) -> None:
         """
         Initialises the Person class with the given parameters.
 
@@ -90,6 +90,7 @@ class Person:
         self.__disease: disease.Disease = disease_obj
         self.__incubation_time: float = incubation_time
         self.__seconds_per_hour: float = seconds_per_hour
+        self.__delta_time: float = delta_time
 
     def draw_person(self) -> None:
         """
@@ -279,9 +280,9 @@ class Person:
             if self.__incubation_time <= 0: # Set to infected once incubation time left reaches 0
                 self.__status = "I"
         elif self.__status == "I":
-            if self.__disease.recover(): # Probability of recovering
+            if self.__disease.recover(self.__delta_time): # Probability of recovering
                 self.__status = "R"
-            elif self.__disease.die(): # Probability of dying
+            elif self.__disease.die(self.__delta_time): # Probability of dying
                 self.__status = "D"
                 self.__moving = False
 
