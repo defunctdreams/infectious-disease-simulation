@@ -26,7 +26,7 @@ from .simulation import disease
 from .simulation import population
 from .simulation import clock
 from .config import Config
-from .errors import ConfigError, DBError, UsageError
+from .errors import DBError, UsageError
 from .storage.db_handler import DBHandler
 
 class Main:

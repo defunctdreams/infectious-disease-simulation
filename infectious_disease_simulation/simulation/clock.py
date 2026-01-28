@@ -13,7 +13,6 @@ Classes:
 """
 
 import time
-import pygame
 from ..display import Display # For typing
 from ..simulation import population # For typing
 from ..viz import plot_graph

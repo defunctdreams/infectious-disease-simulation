@@ -1,11 +1,10 @@
 # NEW FILE: infectious_disease_simulation/persistence/db.py
 
 import sqlite3
-from typing import Optional, List, Tuple
+from typing import Optional
 from datetime import datetime
-
-from ..config import Config  # NEW
-from ..errors import DBError  # NEW
+from ..config import Config
+from ..errors import DBError
 
 
 class DBHandler:
@@ -95,7 +94,7 @@ class DBHandler:
         except sqlite3.Error as e:
             raise DBError(f"Error saving parameters: {e}")  # NEW
 
-    def fetch_runs_summary(self) -> List[Tuple]:
+    def fetch_runs_summary(self) -> list[tuple]:
         """
         Return a summary of previous runs for selection in the UI.
         Columns: run_id, datetime, simulation_name, num_houses, num_offices,

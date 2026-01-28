@@ -12,8 +12,8 @@ Classes:
 """
 import pygame
 import numpy as np
-from ..display import Display # For typing
 from .graph import mst
+from ..display import Display # For typing
 
 class Roads:
     """

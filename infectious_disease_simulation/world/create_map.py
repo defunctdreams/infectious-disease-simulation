@@ -10,9 +10,9 @@ Imports:
 Classes:
     CreateMap
 """
+from .tilemap import Tilemap
+from .roads import Roads
 from ..display import Display
-from . import tilemap
-from . import roads
 
 class CreateMap:
     """
@@ -42,10 +42,10 @@ class CreateMap:
         self.__building_height: int = building_height
         self.__display: Display = display_obj
         print("Generating Tilemap...")
-        self.__tilemap: tilemap.Tilemap = tilemap.Tilemap(self.__display,
+        self.__tilemap: Tilemap = Tilemap(self.__display,
                                                           num_houses, num_offices,
                                                           building_width, building_height)
-        self.__roads: roads.Roads = None # Roads initialised to None (set later)
+        self.__roads: Roads = None # Roads initialised to None (set later)
 
     def draw(self, pause: bool, additional_roads: bool) -> None:
         """
@@ -60,7 +60,7 @@ class CreateMap:
         print("Drawing Tilemap...")
         self.__tilemap.render(pause) # Draw tilemap
         print("Calculating Roads...")
-        self.__roads = roads.Roads(self.__display, # Calculate roads
+        self.__roads = Roads(self.__display, # Calculate roads
                                    self.__tilemap.get_map(),
                                    self.__building_width, self.__building_height,
                                    additional_roads)
@@ -68,7 +68,7 @@ class CreateMap:
         self.__roads.draw_roads(pause) # Draw roads
         self.__display.update()
 
-    def get_tilemap(self) -> tilemap.Tilemap:
+    def get_tilemap(self) -> Tilemap:
         """
         Returns the Tilemap object.
         

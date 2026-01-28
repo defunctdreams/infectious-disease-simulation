@@ -14,7 +14,7 @@ Classes:
     Population
 """
 import math
-from . import initialise_people
+from .initialise_people import InitialisePeople
 from ..display import Display # For typing
 from ..world import create_map # For typing
 from ..world import tilemap # For typing
@@ -60,7 +60,7 @@ class Population:
         self.__seconds_per_hour: int = seconds_per_hour
         self.__fps: int = fps
         self.__delta_time: float = 1 / self.__fps
-        self.__people: initialise_people.InitialisePeople = initialise_people.InitialisePeople(self.__num_in_house,
+        self.__people: InitialisePeople = InitialisePeople(self.__num_in_house,
                                                                                                self.__display,
                                                                                                self.__map,
                                                                                                self.__disease,

@@ -1,6 +1,6 @@
 # infectious_disease_simulation/config.py
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 from .errors import ConfigError
 
 @dataclass(frozen=True)
@@ -20,7 +20,7 @@ class Config:
     mortality_rate: float
 
     @staticmethod
-    def from_dict(params: Dict[str, Any]) -> "Config":
+    def from_dict(params: dict[str, Any]) -> "Config":
         # validate types, bounds; raise ConfigError on invalid input
         try:
             name = str(params["simulation_name"])
